@@ -2,6 +2,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const WebpackPwaManifest = require('webpack-pwa-manifest');
 const path = require('path');
 const { InjectManifest } = require('workbox-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = () => {
   return {
@@ -15,22 +16,23 @@ module.exports = () => {
       path: path.resolve(__dirname, 'dist'),
     },
     plugins: [
-      // Generates the html file
       new HtmlWebpackPlugin({
-        template: './index.html'
+        template: './index.html',
       }),
-      // Custom service worker
+      new MiniCssExtractPlugin(),
+      // Injects a custom service worker
       new InjectManifest({
         swSrc: './src-sw.js',
-        swDest: 'src-sw.js'
+        swDest: 'src-sw.js',
       }),
       // Creates a manifest.json file
       new WebpackPwaManifest({
+        filename: 'manifest.json',
         inject: true,
         fingerprints: false,
-        name: 'Text-Editor-PWA',
-        short_name: 'Text-Editor',
-        description: 'Personal text editor.',
+        name: 'Just Another Text Editor',
+        short_name: 'J.A.T.E',
+        description: 'Just another text editor',
         background_color: '#225ca3',
         theme_color: '#225ca3',
         start_url: '/',
@@ -43,15 +45,15 @@ module.exports = () => {
             destination: path.join('assets', 'icons'),
           }
         ]
-      }) 
+      })
     ],
 
     module: {
-      // CSS loaders
       rules: [
         {
+          // CSS loaders and babel loader
           test: /\.m?js$/,
-          exclude: /node_modules/,
+          exclude: /(node_modules|bower_components)/,
           use: {
             loader: 'babel-loader',
             options: {
@@ -60,13 +62,13 @@ module.exports = () => {
             },
           },
         },
-        { 
+        {
           test: /\.(png|svg|jpg|jpeg|gif)$/i,
           type: 'asset/resource',
         },
         {
           test: /\.css$/i,
-          use: ['style-loader', 'css-loader'],
+          use: [MiniCssExtractPlugin.loader, 'css-loader'],
         },
       ],
     },
